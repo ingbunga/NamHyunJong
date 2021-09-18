@@ -22,6 +22,8 @@
             color: white;
 
             font-family: monospace;
+
+            width: 80%;
         }
 
         #console {
@@ -88,6 +90,7 @@
                 }
                 catch(e) {
                     writeInConsole(e);
+                    console.error(e);
                 }
                 if(val !== null) {
                     writeInConsole(val);

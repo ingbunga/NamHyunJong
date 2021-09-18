@@ -8,15 +8,16 @@ class Env {
     constructor(params=[], args=[], outer=null) {
         this.scope = {
             ...this.scope, 
-            ...params.reduce((acc, e, i) => acc[e] = args[i], {}),
-            outer
+            ...params.reduce((acc, e, i) => ({...acc, [e]: args[i]}), {}),
         };
+        this.outer = outer;
     }
 
     find(name) {
         if(this.scope[name] !== undefined)
             return this.scope;
         else
+            console.log(name);
             return this.outer.find(name);
     }
 }
@@ -25,7 +26,7 @@ class Env {
 function Procedure(params, body, env) {
 
     return function(...args) {
-        return _eval(body, Env(params, args, env));
+        return _eval(body, new Env(params, args, env));
     }
 
 }
@@ -48,6 +49,11 @@ function standard_env() {
         '-'         : (x1, x2) => x1 - x2,
         '*'         : (x1, x2) => x1 * x2,
         '/'         : (x1, x2) => x1 / x2,
+        '>'         : (x1, x2) => x1 > x2,
+        '<'         : (x1, x2) => x1 < x2,
+        '>='        : (x1, x2) => x1 >= x2,
+        '<='        : (x1, x2) => x1 <= x2,
+        '='         : (x1, x2) => x1 == x2,
         'append'    : (xs1, xs2) => xs1.concat(xs2),
         'apply'     : (xs, f) => f(...xs),
         'begin'     : (...args) => args.slice(-1)[0],
@@ -77,6 +83,7 @@ function standard_env() {
     };
     return env;
 }
+
 
 const math_env = new Env();
 math_env.scope = Math;
