@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NamHyunJong</title>
+    <style>
+        body, html {
+            width: 100%;
+            height: 100%;
+
+            margin: 0px;
+            padding: 0px;
+        }
+
+        #input {
+            outline: none;
+            border: none;
+
+            background-color: rgb(29, 29, 29);
+            color: white;
+
+            font-family: monospace;
+        }
+
+        #console {
+            width: 100%;
+            height: 100%;
+
+            background-color: rgb(29, 29, 29);
+            color: white;
+        }
+
+        #wrapper {
+            width: 100%;
+            height: 100%;
+        
+            display: flex;
+            flex-direction: column;
+
+            justify-content: flex-start;
+        }
+
+        #output {
+
+            overflow-y: auto;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="console">
+        <label for="input">
+            <div id="wrapper">
+                <code id="output">
+                    NamHyunJong 0.0.1<br>
+                </code>
+                <code>>> <input type="input" id="input" autofocus></code>
+            </div>
+        </label>
+    </div>
+    <script src="core.js"></script>
+    <script>
+        function gotoBottom(id){
+            var element = document.getElementById(id);
+            element.scrollTop = element.scrollHeight - element.clientHeight;
+        }
+    </script>
+    <script>
+        const inputDom = document.querySelector('#input');
+        const outputDom = document.querySelector('#output');
+
+        global_env.scope.print = (...args) => {
+            outputDom.innerHTML += schemestr(args) + '<br>'
+        }
+
+        inputDom.addEventListener('keypress', (e)=>{
+            function writeInConsole(s) {
+                outputDom.innerHTML += '>> ' + inputDom.value + '<br>';
+                outputDom.innerHTML += s + '<br>';
+                inputDom.value = '';
+            }
+
+            if(e.code === 'Enter') {
+                try {
+                    var val = _eval(parse(inputDom.value));
+                }
+                catch(e) {
+                    writeInConsole(e);
+                }
+                if(val !== null) {
+                    writeInConsole(val);
+                }
+                gotoBottom('output');
+            }
+        });
+
+    </script>
+</body>
+</html>
