@@ -22,14 +22,12 @@ let temp_input = '';
 
 inputDom.addEventListener('keydown', (e) => {
     keyPressed[e.key] = true;
-    console.log(e.key, keyPressed);
 
 
     function writeInConsole(datas) {
         AddToOutput(frontDom.innerHTML + ' ' + inputDom.value + '<br>');
         AddToOutput(temp_lazy_print);
         for (const data of datas) {
-            console.log(data);
             AddToOutput(data + '<br>');
         }
         inputDom.value = '';
@@ -51,7 +49,6 @@ inputDom.addEventListener('keydown', (e) => {
     else if (keyPressed['Enter']) {
         try {
             var val = parse(temp_input + inputDom.value).map(e => _eval(e));
-            console.log(val);
         }
         catch (e) {
             writeInConsole([e]);
