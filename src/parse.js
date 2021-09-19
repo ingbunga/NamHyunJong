@@ -1,5 +1,5 @@
-import { _Symbol } from './core';
-import { tokenize } from './tokenizer';
+import { _Symbol } from './core.js';
+import { tokenize } from './tokenizer.js';
 
 
 export function read_from_token(tokens) {
@@ -58,4 +58,3 @@ export function parse(program) {
 }
 
 
-// console.log(parse(`(+ 10 20)(+ 30 40)`))

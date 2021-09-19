@@ -53,7 +53,8 @@ export function tokenize(chars) {
 
                 tokens.push(inner_str);
                 break;
-
+            
+            case '\n':
             case ' ':
                 saveAcc();
                 clearAcc();

@@ -18,3 +18,7 @@ test('test 1 + 2', () => {
 test('add string', () => {
     expect(parse(`(+ "hello" "world !")`)).toStrictEqual([[new _Symbol('+'), `hello`, `world !`]])
 })
+
+test('change line', () => {
+    expect(parse(`10\n20`)).toStrictEqual([10, 20])
+})

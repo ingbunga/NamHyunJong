@@ -17,4 +17,7 @@ test('add string', () => {
     expect(tokenize(`(+ "hello" "world !")`)).toStrictEqual([`(`, `+`, `"hello"`, `"world !"`, `)`])
 })
 
+test('change line', () => {
+    expect(tokenize(`10\n20`)).toStrictEqual([`10`, `20`])
+})
 
