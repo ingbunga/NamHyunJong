@@ -13,10 +13,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "schemestr": () => (/* binding */ schemestr),
 /* harmony export */   "global_env": () => (/* binding */ global_env)
 /* harmony export */ });
-/* harmony import */ var _tokenizer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
-/* harmony import */ var _parse__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(3);
-
-
 
 class _Symbol {
     constructor(name) {
@@ -167,6 +163,80 @@ global_env.outer = math_env;
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "read_from_token": () => (/* binding */ read_from_token),
+/* harmony export */   "atom": () => (/* binding */ atom),
+/* harmony export */   "parse": () => (/* binding */ parse)
+/* harmony export */ });
+/* harmony import */ var _core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1);
+/* harmony import */ var _tokenizer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(3);
+
+
+
+
+function read_from_token(tokens) {
+    const parsed = [];
+    
+    function parse_one() {
+        const token = tokens.shift();
+    
+        switch(token) {
+            case '(':
+                const sub_tkn = []
+                while (tokens[0] !== ')')
+                    sub_tkn.push(parse_one(tokens))
+                tokens.shift(); // remove ')'
+                return sub_tkn;
+            
+            case ')':
+                console.log(parsed, token, tokens)
+                throw SyntaxError('unexpected )');
+                
+            default:
+                return atom(token);
+                
+        }
+    }
+
+    while (tokens.length > 0) {
+        parsed.push(parse_one());
+    }
+
+    return parsed;
+}
+
+
+function isStingAtom(token) {
+    return (
+        token.length >= 2 &&
+        token[0] == '"' &&
+        token[token.length-1] == '"'
+    )
+}
+
+function atom(token) {
+    const ftoken = parseFloat(token);
+    if(!isNaN(ftoken))
+        return ftoken
+    if(isStingAtom(token))
+        return String(token.slice(1, -1))
+    else
+        return new _core__WEBPACK_IMPORTED_MODULE_0__._Symbol(token)
+}
+
+
+function parse(program) {
+    return read_from_token((0,_tokenizer__WEBPACK_IMPORTED_MODULE_1__.tokenize)(program))
+}
+
+
+// console.log(parse(`(+ 10 20)(+ 30 40)`))
+
+/***/ }),
+/* 3 */
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "tokenize": () => (/* binding */ tokenize)
 /* harmony export */ });
 
@@ -242,68 +312,6 @@ function tokenize(chars) {
 }
 
 
-/***/ }),
-/* 3 */
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "read_from_token": () => (/* binding */ read_from_token),
-/* harmony export */   "atom": () => (/* binding */ atom),
-/* harmony export */   "parse": () => (/* binding */ parse)
-/* harmony export */ });
-/* harmony import */ var _core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1);
-/* harmony import */ var _tokenizer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(2);
-
-
-
-
-function read_from_token(tokens) {
-    if (tokens.length === 0)
-        throw SyntaxError("unexpected EOF");
-
-    const token = tokens.shift();
-
-    switch(token) {
-        case '(':
-            const sub_tkn = []
-            while (tokens[0] !== ')')
-                sub_tkn.push(read_from_token(tokens))
-            tokens.shift(); // remove ')'
-            return sub_tkn;
-        case ')':
-            throw SyntaxError('unexpected )');
-        default:
-            return atom(token);
-    }
-    
-}
-
-
-function isStingAtom(token) {
-    return (
-        token.length >= 2 &&
-        token[0] == '"' &&
-        token[token.length-1] == '"'
-    )
-}
-
-function atom(token) {
-    const ftoken = parseFloat(token);
-    if(!isNaN(ftoken))
-        return ftoken
-    if(isStingAtom(token))
-        return String(token.slice(1, -1))
-    else
-        return new _core__WEBPACK_IMPORTED_MODULE_0__._Symbol(token)
-}
-
-
-function parse(program) {
-    return read_from_token((0,_tokenizer__WEBPACK_IMPORTED_MODULE_1__.tokenize)(program))
-}
-
-
 /***/ })
 /******/ 	]);
 /************************************************************************/
@@ -366,7 +374,7 @@ var __webpack_exports__ = {};
 (() => {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _src_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1);
-/* harmony import */ var _src_parse__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(3);
+/* harmony import */ var _src_parse__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(2);
 
 
 
@@ -375,7 +383,7 @@ const inputDom = document.querySelector('#input');
 const outputDom = document.querySelector('#output');
 
 
-function gotoBottom(element){
+function gotoBottom(element) {
     element.scrollTop = element.scrollHeight - element.clientHeight;
 }
 
@@ -386,27 +394,31 @@ _src_core__WEBPACK_IMPORTED_MODULE_0__.global_env.scope.print = (...args) => {
     temp_lazy_print += args.map(String).join(' ') + '<br>'
 }
 
-inputDom.addEventListener('keypress', (e)=>{
-    function writeInConsole(s) {
+inputDom.addEventListener('keypress', (e) => {
+    function writeInConsole(datas) {
         outputDom.innerHTML += '>> ' + inputDom.value + '<br>';
         outputDom.innerHTML += temp_lazy_print;
-        outputDom.innerHTML += s + '<br>';
+        for (const data of datas) {
+            console.log(data);
+            outputDom.innerHTML += data + '<br>';
+        }
         inputDom.value = '';
         temp_lazy_print = '';
     }
 
-    if(e.code === 'Enter') {
+    if (e.code === 'Enter') {
         try {
-            var val = (0,_src_core__WEBPACK_IMPORTED_MODULE_0__._eval)((0,_src_parse__WEBPACK_IMPORTED_MODULE_1__.parse)(inputDom.value));
+            var val = (0,_src_parse__WEBPACK_IMPORTED_MODULE_1__.parse)(inputDom.value).map(e => (0,_src_core__WEBPACK_IMPORTED_MODULE_0__._eval)(e));
             console.log(val);
         }
-        catch(e) {
-            writeInConsole(e);
+        catch (e) {
+            writeInConsole([e]);
             console.error(e);
         }
-        if(val !== null) {
-            writeInConsole((0,_src_core__WEBPACK_IMPORTED_MODULE_0__.schemestr)(val));
-        }
+
+
+        writeInConsole(val.map(_src_core__WEBPACK_IMPORTED_MODULE_0__.schemestr));
+
         gotoBottom(outputDom);
     }
 });

@@ -3,24 +3,34 @@ import { tokenize } from './tokenizer';
 
 
 export function read_from_token(tokens) {
-    if (tokens.length === 0)
-        throw SyntaxError("unexpected EOF");
-
-    const token = tokens.shift();
-
-    switch(token) {
-        case '(':
-            const sub_tkn = []
-            while (tokens[0] !== ')')
-                sub_tkn.push(read_from_token(tokens))
-            tokens.shift(); // remove ')'
-            return sub_tkn;
-        case ')':
-            throw SyntaxError('unexpected )');
-        default:
-            return atom(token);
-    }
+    const parsed = [];
     
+    function parse_one() {
+        const token = tokens.shift();
+    
+        switch(token) {
+            case '(':
+                const sub_tkn = []
+                while (tokens[0] !== ')')
+                    sub_tkn.push(parse_one(tokens))
+                tokens.shift(); // remove ')'
+                return sub_tkn;
+            
+            case ')':
+                console.log(parsed, token, tokens)
+                throw SyntaxError('unexpected )');
+                
+            default:
+                return atom(token);
+                
+        }
+    }
+
+    while (tokens.length > 0) {
+        parsed.push(parse_one());
+    }
+
+    return parsed;
 }
 
 
@@ -46,3 +56,6 @@ export function atom(token) {
 export function parse(program) {
     return read_from_token(tokenize(program))
 }
+
+
+// console.log(parse(`(+ 10 20)(+ 30 40)`))

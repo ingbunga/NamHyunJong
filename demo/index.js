@@ -6,7 +6,7 @@ const inputDom = document.querySelector('#input');
 const outputDom = document.querySelector('#output');
 
 
-function gotoBottom(element){
+function gotoBottom(element) {
     element.scrollTop = element.scrollHeight - element.clientHeight;
 }
 
@@ -17,27 +17,31 @@ global_env.scope.print = (...args) => {
     temp_lazy_print += args.map(String).join(' ') + '<br>'
 }
 
-inputDom.addEventListener('keypress', (e)=>{
-    function writeInConsole(s) {
+inputDom.addEventListener('keypress', (e) => {
+    function writeInConsole(datas) {
         outputDom.innerHTML += '>> ' + inputDom.value + '<br>';
         outputDom.innerHTML += temp_lazy_print;
-        outputDom.innerHTML += s + '<br>';
+        for (const data of datas) {
+            console.log(data);
+            outputDom.innerHTML += data + '<br>';
+        }
         inputDom.value = '';
         temp_lazy_print = '';
     }
 
-    if(e.code === 'Enter') {
+    if (e.code === 'Enter') {
         try {
-            var val = _eval(parse(inputDom.value));
+            var val = parse(inputDom.value).map(e => _eval(e));
             console.log(val);
         }
-        catch(e) {
-            writeInConsole(e);
+        catch (e) {
+            writeInConsole([e]);
             console.error(e);
         }
-        if(val !== null) {
-            writeInConsole(schemestr(val));
-        }
+
+
+        writeInConsole(val.map(schemestr));
+
         gotoBottom(outputDom);
     }
 });

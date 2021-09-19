@@ -1,5 +1,3 @@
-import { tokenize } from './tokenizer';
-import { parse } from './parse';
 
 export class _Symbol {
     constructor(name) {
