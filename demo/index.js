@@ -1,6 +1,6 @@
 
-import { global_env, _eval, schemestr } from '../src/core';
-import { parse } from '../src/parse'
+import { global_env, _eval, schemestr } from '../src/core.js';
+import { parse } from '../src/parse.js'
 
 const inputDom = document.getElementById('input');
 const outputDom = document.getElementById('output');
