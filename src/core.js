@@ -17,7 +17,7 @@ export class Env {
     constructor(params=[], args=[], outer=null) {
         this.scope = {
             ...this.scope, 
-            ...params.reduce((acc, e, i) => ({...acc, [e]: args[i]}), {}),
+            ...params.reduce((acc, e, i) => ({...acc, [e.name]: args[i]}), {}),
         };
         this.outer = outer;
     }
