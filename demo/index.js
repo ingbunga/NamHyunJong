@@ -2,9 +2,9 @@
 import { global_env, _eval, schemestr } from '../src/core';
 import { parse } from '../src/parse'
 
-const inputDom = document.querySelector('#input');
-const outputDom = document.querySelector('#output');
-
+const inputDom = document.getElementById('input');
+const outputDom = document.getElementById('output');
+const frontDom = document.getElementById('front');
 
 function gotoBottom(element) {
     element.scrollTop = element.scrollHeight - element.clientHeight;
@@ -17,21 +17,40 @@ global_env.scope.print = (...args) => {
     temp_lazy_print += args.map(String).join(' ') + '<br>'
 }
 
-inputDom.addEventListener('keypress', (e) => {
+const keyPressed = {};
+let temp_input = '';
+
+inputDom.addEventListener('keydown', (e) => {
+    keyPressed[e.key] = true;
+    console.log(e.key, keyPressed);
+
+
     function writeInConsole(datas) {
-        outputDom.innerHTML += '>> ' + inputDom.value + '<br>';
-        outputDom.innerHTML += temp_lazy_print;
+        AddToOutput(frontDom.innerHTML + ' ' + inputDom.value + '<br>');
+        AddToOutput(temp_lazy_print);
         for (const data of datas) {
             console.log(data);
-            outputDom.innerHTML += data + '<br>';
+            AddToOutput(data + '<br>');
         }
         inputDom.value = '';
         temp_lazy_print = '';
     }
 
-    if (e.code === 'Enter') {
+    function AddToOutput(text) {
+        outputDom.innerHTML += text.replace(/\s/gi, '&nbsp;');
+    }
+
+    if (keyPressed['Shift'] && keyPressed['Enter']) {
+        temp_input += inputDom.value + '\n';
+
+        AddToOutput(frontDom.innerHTML + ' ' + inputDom.value + '<br>');
+
+        frontDom.innerHTML = '..';
+        inputDom.value = '';
+    }
+    else if (keyPressed['Enter']) {
         try {
-            var val = parse(inputDom.value).map(e => _eval(e));
+            var val = parse(temp_input + inputDom.value).map(e => _eval(e));
             console.log(val);
         }
         catch (e) {
@@ -43,10 +62,25 @@ inputDom.addEventListener('keypress', (e) => {
         writeInConsole(val.map(schemestr));
 
         gotoBottom(outputDom);
+        frontDom.innerHTML = '>>';
+        temp_input = '';
     }
 });
 
 
+inputDom.addEventListener('keyup', (event) => {
+    keyPressed[event.key] = false;
+});
+
+
 globalThis.debug = {
-    global_env
+    global_env,
+    keyPressed
 }
+// textarea
+var heightLimit = 200; /* Maximum height: 200px */
+
+inputDom.oninput = function () {
+    inputDom.style.height = ""; /* Reset the height*/
+    inputDom.style.height = Math.min(inputDom.scrollHeight - 3, heightLimit) + "px";
+};

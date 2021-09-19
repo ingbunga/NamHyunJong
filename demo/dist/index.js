@@ -167,8 +167,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "atom": () => (/* binding */ atom),
 /* harmony export */   "parse": () => (/* binding */ parse)
 /* harmony export */ });
-/* harmony import */ var _core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1);
-/* harmony import */ var _tokenizer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(3);
+/* harmony import */ var _core_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1);
+/* harmony import */ var _tokenizer_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(3);
 
 
 
@@ -220,16 +220,16 @@ function atom(token) {
     if(isStingAtom(token))
         return String(token.slice(1, -1))
     else
-        return new _core__WEBPACK_IMPORTED_MODULE_0__._Symbol(token)
+        return new _core_js__WEBPACK_IMPORTED_MODULE_0__._Symbol(token)
 }
 
 
 function parse(program) {
-    return read_from_token((0,_tokenizer__WEBPACK_IMPORTED_MODULE_1__.tokenize)(program))
+    return read_from_token((0,_tokenizer_js__WEBPACK_IMPORTED_MODULE_1__.tokenize)(program))
 }
 
 
-// console.log(parse(`(+ 10 20)(+ 30 40)`))
+
 
 /***/ }),
 /* 3 */
@@ -294,7 +294,8 @@ function tokenize(chars) {
 
                 tokens.push(inner_str);
                 break;
-
+            
+            case '\n':
             case ' ':
                 saveAcc();
                 clearAcc();
@@ -379,9 +380,9 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-const inputDom = document.querySelector('#input');
-const outputDom = document.querySelector('#output');
-
+const inputDom = document.getElementById('input');
+const outputDom = document.getElementById('output');
+const frontDom = document.getElementById('front');
 
 function gotoBottom(element) {
     element.scrollTop = element.scrollHeight - element.clientHeight;
@@ -394,21 +395,40 @@ _src_core__WEBPACK_IMPORTED_MODULE_0__.global_env.scope.print = (...args) => {
     temp_lazy_print += args.map(String).join(' ') + '<br>'
 }
 
-inputDom.addEventListener('keypress', (e) => {
+const keyPressed = {};
+let temp_input = '';
+
+inputDom.addEventListener('keydown', (e) => {
+    keyPressed[e.key] = true;
+    console.log(e.key, keyPressed);
+
+
     function writeInConsole(datas) {
-        outputDom.innerHTML += '>> ' + inputDom.value + '<br>';
-        outputDom.innerHTML += temp_lazy_print;
+        AddToOutput(frontDom.innerHTML + ' ' + inputDom.value + '<br>');
+        AddToOutput(temp_lazy_print);
         for (const data of datas) {
             console.log(data);
-            outputDom.innerHTML += data + '<br>';
+            AddToOutput(data + '<br>');
         }
         inputDom.value = '';
         temp_lazy_print = '';
     }
 
-    if (e.code === 'Enter') {
+    function AddToOutput(text) {
+        outputDom.innerHTML += text.replace(/\s/gi, '&nbsp;');
+    }
+
+    if (keyPressed['Shift'] && keyPressed['Enter']) {
+        temp_input += inputDom.value + '\n';
+
+        AddToOutput(frontDom.innerHTML + ' ' + inputDom.value + '<br>');
+
+        frontDom.innerHTML = '..';
+        inputDom.value = '';
+    }
+    else if (keyPressed['Enter']) {
         try {
-            var val = (0,_src_parse__WEBPACK_IMPORTED_MODULE_1__.parse)(inputDom.value).map(e => (0,_src_core__WEBPACK_IMPORTED_MODULE_0__._eval)(e));
+            var val = (0,_src_parse__WEBPACK_IMPORTED_MODULE_1__.parse)(temp_input + inputDom.value).map(e => (0,_src_core__WEBPACK_IMPORTED_MODULE_0__._eval)(e));
             console.log(val);
         }
         catch (e) {
@@ -420,13 +440,28 @@ inputDom.addEventListener('keypress', (e) => {
         writeInConsole(val.map(_src_core__WEBPACK_IMPORTED_MODULE_0__.schemestr));
 
         gotoBottom(outputDom);
+        frontDom.innerHTML = '>>';
+        temp_input = '';
     }
 });
 
 
+inputDom.addEventListener('keyup', (event) => {
+    keyPressed[event.key] = false;
+});
+
+
 globalThis.debug = {
-    global_env: _src_core__WEBPACK_IMPORTED_MODULE_0__.global_env
+    global_env: _src_core__WEBPACK_IMPORTED_MODULE_0__.global_env,
+    keyPressed
 }
+// textarea
+var heightLimit = 200; /* Maximum height: 200px */
+
+inputDom.oninput = function () {
+    inputDom.style.height = ""; /* Reset the height*/
+    inputDom.style.height = Math.min(inputDom.scrollHeight - 3, heightLimit) + "px";
+};
 })();
 
 /******/ })()
