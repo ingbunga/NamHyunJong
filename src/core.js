@@ -90,6 +90,8 @@ function standard_env() {
         'round'     : Math.round,
         'symbol?'   : isSymbol,
         'string?'   : isString,
+        'Math'      : Math,
+        'new'       : (arg) => new arg,
     };
     return env;
 }
@@ -119,9 +121,19 @@ export function _eval(x, env = global_env) {
         case 'lambda':
             var [params, body] = args;
             return Procedure(params, body, env);
+        case '.':
+            return args.slice(1)
+                       .reduce((acc, e) => (
+                           acc[e.name] instanceof Function
+                           ? acc[e.name].bind(acc)
+                           : acc[e.name]
+                        ), _eval(args[0]));
         default:
             var proc = _eval(x[0], env);
             var execArgs = args.map(arg => _eval(arg, env));
+            console.log(proc, execArgs);
+            debug.f = proc;
+            debug.a = execArgs;
             return proc(...execArgs);
     }
 }
@@ -137,7 +149,7 @@ export function schemestr(exp) {
 }
 
 
-const math_env = new Env();
-math_env.scope = Math;
+const js_env = new Env();
+js_env.scope = globalThis;
 export const global_env = standard_env();
-global_env.outer = math_env;
+global_env.outer = js_env;

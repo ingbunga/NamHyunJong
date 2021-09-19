@@ -49,18 +49,19 @@ inputDom.addEventListener('keydown', (e) => {
     else if (keyPressed['Enter']) {
         try {
             var val = parse(temp_input + inputDom.value).map(e => _eval(e));
+            
+            writeInConsole(val.map(schemestr));    
         }
         catch (e) {
             writeInConsole([e]);
             console.error(e);
         }
-
-
-        writeInConsole(val.map(schemestr));
-
-        gotoBottom(outputDom);
-        frontDom.innerHTML = '>>';
-        temp_input = '';
+        finally {
+            gotoBottom(outputDom);
+            
+            frontDom.innerHTML = '>>';
+            temp_input = '';
+        }
     }
 });
 
@@ -74,10 +75,3 @@ globalThis.debug = {
     global_env,
     keyPressed
 }
-// textarea
-var heightLimit = 200; /* Maximum height: 200px */
-
-inputDom.oninput = function () {
-    inputDom.style.height = ""; /* Reset the height*/
-    inputDom.style.height = Math.min(inputDom.scrollHeight - 3, heightLimit) + "px";
-};

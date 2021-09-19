@@ -9,6 +9,8 @@ export function read_from_token(tokens) {
         const token = tokens.shift();
     
         switch(token) {
+            case undefined:
+                throw SyntaxError("uncomplete input");
             case '(':
                 const sub_tkn = []
                 while (tokens[0] !== ')')
