@@ -2,28 +2,22 @@ import { tokenize } from './tokenizer';
 import { parse } from './parse';
 
 export class _Symbol {
-    
-    name;
-
     constructor(name) {
         this.name = name;
     }
 }
 
 export class Env {
-    outer;
-    scope;
-
-    constructor(params=[], args=[], outer=null) {
+    constructor(params = [], args = [], outer = null) {
         this.scope = {
-            ...this.scope, 
-            ...params.reduce((acc, e, i) => ({...acc, [e.name]: args[i]}), {}),
+            ...this.scope,
+            ...params.reduce((acc, e, i) => ({ ...acc, [e.name]: args[i] }), {}),
         };
         this.outer = outer;
     }
 
     find(name) {
-        if(this.scope[name] !== undefined)
+        if (this.scope[name] !== undefined)
             return this.scope;
         else
             return this.outer.find(name);
@@ -33,13 +27,13 @@ export class Env {
 
 function Procedure(params, body, env) {
 
-    const createdFunc = function(...args) {
+    const createdFunc = function (...args) {
         return _eval(body, new Env(params, args, env));
     };
     createdFunc.toString = () => (
-        `[Procedure (${params.map(e=>e?.name)})]`
+        `[Procedure (${params.map(e => e?.name)})]`
     );
-    
+
     return createdFunc;
 }
 
@@ -49,21 +43,23 @@ function isSymbol(s) {
 }
 
 function isString(s) {
-    return typeof(s) === 'string' || s instanceof String;
+    return typeof (s) === 'string' || s instanceof String;
 }
 
 function isNumber(n) {
-    return typeof(n) === 'number' || n instanceof Number;
+    return typeof (n) === 'number' || n instanceof Number;
 }
 
 
 function standard_env() {
     const env = new Env();
     env.scope = {
-        '+'         : (...xs) => xs.reduce((acc, e) => acc+e),
-        '-'         : (x1, x2) => x1 - x2,
-        '*'         : (x1, x2) => x1 * x2,
-        '/'         : (x1, x2) => x1 / x2,
+        '+'         : (...xs) => xs.reduce((acc, e) => acc + e),
+        '-'         : (...xs) => xs.length === 1
+                                 ? -xs[0]
+                                 :xs.reduce((acc, e) => acc - e),
+        '*'         : (...xs) => xs.reduce((acc, e) => acc * e),
+        '/'         : (...xs) => xs.reduce((acc, e) => acc / e),
         '>'         : (x1, x2) => x1 > x2,
         '<'         : (x1, x2) => x1 < x2,
         '>='        : (x1, x2) => x1 >= x2,
@@ -83,11 +79,11 @@ function standard_env() {
         'list?'     : x => x instanceof Array,
         'map'       : (f, xs) => xs.map(f),
         'max'       : (...args) => args.length === 1
-                                ? Math.max(...args[0])
-                                : Math.max(...args),
+                                   ? Math.max(...args[0])
+                                   : Math.max(...args),
         'min'       : (...args) => args.length === 1
-                                ? Math.min(...args[0])
-                                : Math.min(...args),
+                                   ? Math.min(...args[0])
+                                   : Math.min(...args),
         'not'       : x => !x,
         'null'      : x => x instanceof Array ? x.length < 1 : false,
         'number?'   : isNumber,
@@ -101,13 +97,13 @@ function standard_env() {
 }
 
 
-export function _eval(x, env=global_env) {
+export function _eval(x, env = global_env) {
     if (isSymbol(x))
         return env.find(x.name)[x.name];
     if (isNumber(x) || isString(x))
         return x;
     const [op, ...args] = x;
-    switch(op?.name) {
+    switch (op?.name) {
         case 'quote':
             return args[0];
         case 'if':
@@ -134,9 +130,9 @@ export function _eval(x, env=global_env) {
 
 
 export function schemestr(exp) {
-    if(isString(exp))
+    if (isString(exp))
         return `"${exp}"`
-    if(exp instanceof Array)
+    if (exp instanceof Array)
         return '(' + exp.map(schemestr).join(' ') + ')'
     else
         return String(exp)
