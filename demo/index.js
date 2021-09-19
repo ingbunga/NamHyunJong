@@ -1,5 +1,5 @@
 
-import { global_env, _eval } from '../src/core';
+import { global_env, _eval, schemestr } from '../src/core';
 import { parse } from '../src/parse'
 
 const inputDom = document.querySelector('#input');
@@ -29,13 +29,14 @@ inputDom.addEventListener('keypress', (e)=>{
     if(e.code === 'Enter') {
         try {
             var val = _eval(parse(inputDom.value));
+            console.log(val);
         }
         catch(e) {
             writeInConsole(e);
             console.error(e);
         }
         if(val !== null) {
-            writeInConsole(val);
+            writeInConsole(schemestr(val));
         }
         gotoBottom(outputDom);
     }

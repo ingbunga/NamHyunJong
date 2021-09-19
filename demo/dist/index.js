@@ -10,6 +10,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "_Symbol": () => (/* binding */ _Symbol),
 /* harmony export */   "Env": () => (/* binding */ Env),
 /* harmony export */   "_eval": () => (/* binding */ _eval),
+/* harmony export */   "schemestr": () => (/* binding */ schemestr),
 /* harmony export */   "global_env": () => (/* binding */ global_env)
 /* harmony export */ });
 /* harmony import */ var _tokenizer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
@@ -42,7 +43,6 @@ class Env {
         if(this.scope[name] !== undefined)
             return this.scope;
         else
-            console.log(name);
             return this.outer.find(name);
     }
 }
@@ -54,7 +54,7 @@ function Procedure(params, body, env) {
         return _eval(body, new Env(params, args, env));
     };
     createdFunc.toString = () => (
-        `[Procedure]`
+        `[Procedure (${params.map(e=>e?.name)})]`
     );
     
     return createdFunc;
@@ -134,7 +134,7 @@ function _eval(x, env=global_env) {
         case 'define':
             var [symbol, exp] = args;
             env.scope[symbol.name] = _eval(exp, env);
-            return env.scope[symbol];
+            return env.scope[symbol.name];
         case 'set!':
             var [symbol, exp] = args;
             env.find(symbol.name)[symbol.name] = _eval(exp, env);
@@ -156,7 +156,7 @@ function schemestr(exp) {
     if(exp instanceof Array)
         return '(' + exp.map(schemestr).join(' ') + ')'
     else
-        return str(exp)
+        return String(exp)
 }
 
 
@@ -402,13 +402,14 @@ inputDom.addEventListener('keypress', (e)=>{
     if(e.code === 'Enter') {
         try {
             var val = (0,_src_core__WEBPACK_IMPORTED_MODULE_0__._eval)((0,_src_parse__WEBPACK_IMPORTED_MODULE_1__.parse)(inputDom.value));
+            console.log(val);
         }
         catch(e) {
             writeInConsole(e);
             console.error(e);
         }
         if(val !== null) {
-            writeInConsole(val);
+            writeInConsole((0,_src_core__WEBPACK_IMPORTED_MODULE_0__.schemestr)(val));
         }
         gotoBottom(outputDom);
     }

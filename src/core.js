@@ -26,7 +26,6 @@ export class Env {
         if(this.scope[name] !== undefined)
             return this.scope;
         else
-            console.log(name);
             return this.outer.find(name);
     }
 }
@@ -38,7 +37,7 @@ function Procedure(params, body, env) {
         return _eval(body, new Env(params, args, env));
     };
     createdFunc.toString = () => (
-        `[Procedure]`
+        `[Procedure (${params.map(e=>e?.name)})]`
     );
     
     return createdFunc;
@@ -118,7 +117,7 @@ export function _eval(x, env=global_env) {
         case 'define':
             var [symbol, exp] = args;
             env.scope[symbol.name] = _eval(exp, env);
-            return env.scope[symbol];
+            return env.scope[symbol.name];
         case 'set!':
             var [symbol, exp] = args;
             env.find(symbol.name)[symbol.name] = _eval(exp, env);
@@ -134,13 +133,13 @@ export function _eval(x, env=global_env) {
 }
 
 
-function schemestr(exp) {
+export function schemestr(exp) {
     if(isString(exp))
         return `"${exp}"`
     if(exp instanceof Array)
         return '(' + exp.map(schemestr).join(' ') + ')'
     else
-        return str(exp)
+        return String(exp)
 }
 
 
