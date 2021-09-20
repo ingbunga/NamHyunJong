@@ -19,7 +19,6 @@ export function read_from_token(tokens) {
                 return sub_tkn;
             
             case ')':
-                console.log(parsed, token, tokens)
                 throw SyntaxError('unexpected )');
                 
             default:
