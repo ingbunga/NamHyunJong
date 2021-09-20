@@ -24,7 +24,7 @@ export function tokenize(chars) {
         const e = chars[i];
 
         switch (e) {
-            case '(':
+            case '(':thfw
                 saveAcc();
                 tokens.push(e);
                 clearAcc();
