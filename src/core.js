@@ -23,10 +23,12 @@ export class Env {
 }
 
 
-function Procedure(params, body, env) {
+function Procedure(params, bodys, env) {
 
     const createdFunc = function (...args) {
-        return _eval(body, new Env(params, args, env));
+        const createdEnv = new Env(params, args, env);
+
+        return bodys.reduce((_, e) => _eval(e, createdEnv), undefined);
     };
     createdFunc.toString = () => (
         `[Procedure (${params.map(e => e?.name)})]`
@@ -58,11 +60,11 @@ function standard_env() {
                                  :xs.reduce((acc, e) => acc - e),
         '*'         : (...xs) => xs.reduce((acc, e) => acc * e),
         '/'         : (...xs) => xs.reduce((acc, e) => acc / e),
-        '>'         : (x1, x2) => x1 > x2,
-        '<'         : (x1, x2) => x1 < x2,
-        '>='        : (x1, x2) => x1 >= x2,
-        '<='        : (x1, x2) => x1 <= x2,
-        '='         : (x1, x2) => x1 == x2,
+        '>'         : (...xs) => xs.slice(1).reduce((acc, e, i) => acc && xs[i] > e, true),
+        '<'         : (...xs) => xs.slice(1).reduce((acc, e, i) => acc && xs[i] < e, true),
+        '>='        : (...xs) => xs.slice(1).reduce((acc, e, i) => acc && xs[i] >= e, true),
+        '<='        : (...xs) => xs.slice(1).reduce((acc, e, i) => acc && xs[i] <= e, true),
+        '='         : (...xs) => xs.slice(1).reduce((acc, e, i) => acc && xs[i] == e, true),
         'append'    : (xs1, xs2) => xs1.concat(xs2),
         'apply'     : (xs, f) => f(...xs),
         'begin'     : (...args) => args.slice(-1)[0],
@@ -119,21 +121,18 @@ export function _eval(x, env = global_env) {
             env.find(symbol.name)[symbol.name] = _eval(exp, env);
             break;
         case 'lambda':
-            var [params, body] = args;
-            return Procedure(params, body, env);
+            var [params, ...bodys] = args;
+            return Procedure(params, bodys, env);
         case '.':
             return args.slice(1)
                        .reduce((acc, e) => (
                            acc[e.name] instanceof Function
                            ? acc[e.name].bind(acc)
                            : acc[e.name]
-                        ), _eval(args[0]));
+                        ), _eval(args[0], env));
         default:
             var proc = _eval(x[0], env);
             var execArgs = args.map(arg => _eval(arg, env));
-            console.log(proc, execArgs);
-            debug.f = proc;
-            debug.a = execArgs;
             return proc(...execArgs);
     }
 }
@@ -151,5 +150,8 @@ export function schemestr(exp) {
 
 const js_env = new Env();
 js_env.scope = globalThis;
+const math_env = new Env();
+math_env.scope = Math;
+math_env.outer = js_env;
 export const global_env = standard_env();
-global_env.outer = js_env;
+global_env.outer = math_env;
