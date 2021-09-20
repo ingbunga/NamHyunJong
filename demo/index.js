@@ -6,51 +6,45 @@ const inputDom = document.getElementById('input');
 const outputDom = document.getElementById('output');
 const frontDom = document.getElementById('front');
 
-function gotoBottom(element) {
-    element.scrollTop = element.scrollHeight - element.clientHeight;
+global_env.scope.print = (...args) => {
+    AddToOutput(args.map(String).join(' ') + '<br>');
 }
 
-
-let temp_lazy_print = '';
-
-global_env.scope.print = (...args) => {
-    temp_lazy_print += args.map(String).join(' ') + '<br>'
+function AddToOutput(text) {
+    outputDom.innerHTML += text.replace(/\s/gi, '&nbsp;');
 }
 
 const keyPressed = {};
-let temp_input = '';
+let multiline_acc = '';
 
 inputDom.addEventListener('keydown', (e) => {
     keyPressed[e.key] = true;
 
+    function writeInput() {
+        AddToOutput(frontDom.innerHTML + ' ' + inputDom.value + '<br>');
+    }
 
     function writeInConsole(datas) {
-        AddToOutput(frontDom.innerHTML + ' ' + inputDom.value + '<br>');
-        AddToOutput(temp_lazy_print);
         for (const data of datas) {
             AddToOutput(data + '<br>');
         }
         inputDom.value = '';
-        temp_lazy_print = '';
-    }
-
-    function AddToOutput(text) {
-        outputDom.innerHTML += text.replace(/\s/gi, '&nbsp;');
     }
 
     if (keyPressed['Shift'] && keyPressed['Enter']) {
-        temp_input += inputDom.value + '\n';
+        multiline_acc += inputDom.value + '\n';
 
-        AddToOutput(frontDom.innerHTML + ' ' + inputDom.value + '<br>');
+        writeInput();
 
         frontDom.innerHTML = '..';
         inputDom.value = '';
     }
     else if (keyPressed['Enter']) {
+        writeInput();
         try {
-            var val = parse(temp_input + inputDom.value).map(e => _eval(e));
+            var val = parse(multiline_acc + inputDom.value).map(e => _eval(e));
             
-            writeInConsole(val.map(schemestr));    
+            writeInConsole(val.map(schemestr));
         }
         catch (e) {
             writeInConsole([e]);
@@ -60,7 +54,7 @@ inputDom.addEventListener('keydown', (e) => {
             gotoBottom(outputDom);
             
             frontDom.innerHTML = '>>';
-            temp_input = '';
+            multiline_acc = '';
         }
     }
 });
@@ -74,4 +68,8 @@ inputDom.addEventListener('keyup', (event) => {
 globalThis.debug = {
     global_env,
     keyPressed
+}
+
+function gotoBottom(element) {
+    element.scrollTop = element.scrollHeight - element.clientHeight;
 }
