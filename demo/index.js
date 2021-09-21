@@ -24,38 +24,38 @@ const domconsole = {
     
         maximumListSize: 100,
     
-        addToHistory(txt) {
+        add(txt) {
             this.list.push(txt);
             if (this.list.length > this.maximumListSize)
                 this.list.shift();
         },
     
-        setHistoryPtrToLast() {
+        setPtrToLast() {
             this.historyPtr = this.list.length;
         },
     
-        setHistoryPtrToPrev() {
+        setPtrToPrev() {
             if (this.historyPtr > 0)
                 this.historyPtr--;
             else
                 this.historyPtr = 0;
         },
     
-        setHistoryPtrToNext() {
+        setPtrToNext() {
             if (this.historyPtr < this.list.length - 1)
                 this.historyPtr++;
             else
                 this.historyPtr = this.list.length - 1;
         },
     
-        getHistoryTxt() {
+        getPtrTxt() {
             return this.list[this.historyPtr]
         }
     },
     indent: {
         depth: 0,
         
-        parseIndentFromInput(input) {
+        parseFromInput(input) {
             let i;
             for(i = 0; i < input.length; i++)
                 if(input[i] !== ' ')
@@ -63,7 +63,7 @@ const domconsole = {
             this.depth = i;
         },
     
-        getIndentString() {
+        getIndentAsString() {
             return ' '.repeat(this.depth);
         }
     }
@@ -76,12 +76,12 @@ inputDom.addEventListener('keydown', (e) => {
     keyPressed[e.key] = true;
 
     function initInput() {
-        inputDom.value = domconsole.indent.getIndentString();
+        inputDom.value = domconsole.indent.getIndentAsString();
     }
 
     function writeInput() {
-        domconsole.history.addToHistory(inputDom.value);
-        domconsole.indent.parseIndentFromInput(inputDom.value);
+        domconsole.history.add(inputDom.value);
+        domconsole.indent.parseFromInput(inputDom.value);
         
         AddToOutput(frontDom.innerHTML + ' ' + inputDom.value + '<br>');
     }
@@ -101,7 +101,7 @@ inputDom.addEventListener('keydown', (e) => {
         frontDom.innerHTML = '..';
         inputDom.value = '';
 
-        domconsole.history.setHistoryPtrToLast();
+        domconsole.history.setPtrToLast();
         initInput();
     }
     else if (keyPressed['Enter']) {
@@ -121,16 +121,16 @@ inputDom.addEventListener('keydown', (e) => {
             frontDom.innerHTML = '>>';
             multiline_acc = '';
 
-            consoleHistory.setHistoryPtrToLast();
+            domconsole.history.setPtrToLast();
         }
     }
     if (keyPressed['ArrowUp']) {
-        consoleHistory.setHistoryPtrToPrev();
-        inputDom.value = consoleHistory.getHistoryTxt();
+        domconsole.history.setPtrToPrev();
+        inputDom.value = domconsole.history.getPtrTxt();
     }
     if (keyPressed['ArrowDown']) {
-        consoleHistory.setHistoryPtrToNext();
-        inputDom.value = consoleHistory.getHistoryTxt();
+        domconsole.history.setPtrToNext();
+        inputDom.value = domconsole.history.getPtrTxt();
     }
 });
 
@@ -161,8 +161,7 @@ inputDom.addEventListener('paste', (event) => {
 globalThis.debug = {
     global_env,
     keyPressed,
-    consoleHistory,
-    indentManager,
+    console
 }
 
 function gotoBottom(element) {
