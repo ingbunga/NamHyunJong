@@ -53,12 +53,35 @@ const consoleHistory = {
 }
 
 
+const indentManager = {
+    indentDepth: 0,
+    
+    parseIndentFromInput(input) {
+        let i;
+        for(i = 0; i < input.length; i++)
+            if(input[i] !== ' ')
+                break;
+        this.indentDepth = i;
+    },
+
+    getIndentString() {
+        return ' '.repeat(this.indentDepth);
+    }
+    
+}
+
+
 
 inputDom.addEventListener('keydown', (e) => {
     keyPressed[e.key] = true;
 
+    function initInput() {
+        inputDom.value = indentManager.getIndentString();
+    }
+
     function writeInput() {
         consoleHistory.addToHistory(inputDom.value);
+        indentManager.parseIndentFromInput(inputDom.value);
         
         AddToOutput(frontDom.innerHTML + ' ' + inputDom.value + '<br>');
     }
@@ -79,6 +102,7 @@ inputDom.addEventListener('keydown', (e) => {
         inputDom.value = '';
 
         consoleHistory.setHistoryPtrToLast();
+        initInput();
     }
     else if (keyPressed['Enter']) {
         writeInput();
@@ -120,7 +144,7 @@ inputDom.addEventListener('paste', (event) => {
     let text = (event.clipboardData || window.clipboardData).getData('text');
     event.preventDefault();
 
-    function pressEnter() {
+    function pressShiftEnter() {
         inputDom.dispatchEvent(new KeyboardEvent('keydown',{'key':'Shift'}));
         inputDom.dispatchEvent(new KeyboardEvent('keydown',{'key':'Enter'}));
         inputDom.dispatchEvent(new KeyboardEvent('keyup',{'key':'Shift'}));
@@ -130,14 +154,15 @@ inputDom.addEventListener('paste', (event) => {
     text.split('\n').forEach((e, i, original) => {
         inputDom.value = e;
         if(i < original.length - 1)
-            pressEnter();
+            pressShiftEnter();
     });
 })
 
 globalThis.debug = {
     global_env,
     keyPressed,
-    consoleHistory
+    consoleHistory,
+    indentManager,
 }
 
 function gotoBottom(element) {
