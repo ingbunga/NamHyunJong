@@ -30,6 +30,7 @@ function Procedure(params, bodys, env) {
 
     const createdFunc = function (...args) {
         const createdEnv = new Env(params, args, env);
+        createdEnv.scope.arguments = arguments;
 
         return bodys.reduce((_, e) => _eval(e, createdEnv), undefined);
     };
@@ -45,6 +46,7 @@ function Macro(params, bodys, env) {
 
     const createdMacro = function (...args) {
         const createdEnv = new Env(params, args, env);
+        createdEnv.scope.arguments = arguments;
 
         return bodys.reduce((_, e) => _eval(e, createdEnv), undefined);
     }
