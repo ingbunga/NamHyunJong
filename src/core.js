@@ -53,7 +53,7 @@ function Macro(params, bodys, env) {
         return bodys.reduce((_, e) => _eval(e, createdEnv), undefined);
     }
     createdMacro.toString = () => (
-        `[Macro (${params.map(e => e?.name)}]`
+        `[Macro (${params.map(e => e?.name)})]`
     );
     createdMacro.isMacro = true;
     
