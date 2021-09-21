@@ -17,10 +17,49 @@ function AddToOutput(text) {
 const keyPressed = {};
 let multiline_acc = '';
 
+const consoleHistory = {
+    list: [''],
+    historyPtr: 0,
+
+    maximumListSize: 100,
+
+    addToHistory(txt) {
+        this.list.push(txt);
+        if (this.list.length > this.maximumListSize)
+            this.list.shift();
+    },
+
+    setHistoryPtrToLast() {
+        this.historyPtr = this.list.length;
+    },
+
+    setHistoryPtrToPrev() {
+        if (this.historyPtr > 0)
+            this.historyPtr--;
+        else
+            this.historyPtr = 0;
+    },
+
+    setHistoryPtrToNext() {
+        if (this.historyPtr < this.list.length - 1)
+            this.historyPtr++;
+        else
+            this.historyPtr = this.list.length - 1;
+    },
+
+    getHistoryTxt() {
+        return this.list[this.historyPtr]
+    }
+}
+
+
+
 inputDom.addEventListener('keydown', (e) => {
     keyPressed[e.key] = true;
 
     function writeInput() {
+        consoleHistory.addToHistory(inputDom.value);
+        
         AddToOutput(frontDom.innerHTML + ' ' + inputDom.value + '<br>');
     }
 
@@ -38,6 +77,8 @@ inputDom.addEventListener('keydown', (e) => {
 
         frontDom.innerHTML = '..';
         inputDom.value = '';
+
+        consoleHistory.setHistoryPtrToLast();
     }
     else if (keyPressed['Enter']) {
         writeInput();
@@ -55,7 +96,17 @@ inputDom.addEventListener('keydown', (e) => {
             
             frontDom.innerHTML = '>>';
             multiline_acc = '';
+
+            consoleHistory.setHistoryPtrToLast();
         }
+    }
+    if (keyPressed['ArrowUp']) {
+        consoleHistory.setHistoryPtrToPrev();
+        inputDom.value = consoleHistory.getHistoryTxt();
+    }
+    if (keyPressed['ArrowDown']) {
+        consoleHistory.setHistoryPtrToNext();
+        inputDom.value = consoleHistory.getHistoryTxt();
     }
 });
 
@@ -65,9 +116,28 @@ inputDom.addEventListener('keyup', (event) => {
 });
 
 
+inputDom.addEventListener('paste', (event) => {
+    let text = (event.clipboardData || window.clipboardData).getData('text');
+    event.preventDefault();
+
+    function pressEnter() {
+        inputDom.dispatchEvent(new KeyboardEvent('keydown',{'key':'Shift'}));
+        inputDom.dispatchEvent(new KeyboardEvent('keydown',{'key':'Enter'}));
+        inputDom.dispatchEvent(new KeyboardEvent('keyup',{'key':'Shift'}));
+        inputDom.dispatchEvent(new KeyboardEvent('keyup',{'key':'Enter'}));
+    }
+
+    text.split('\n').forEach((e, i, original) => {
+        inputDom.value = e;
+        if(i < original.length - 1)
+            pressEnter();
+    });
+})
+
 globalThis.debug = {
     global_env,
-    keyPressed
+    keyPressed,
+    consoleHistory
 }
 
 function gotoBottom(element) {
