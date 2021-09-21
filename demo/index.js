@@ -152,9 +152,11 @@ inputDom.addEventListener('paste', (event) => {
     }
 
     text.split('\n').forEach((e, i, original) => {
-        inputDom.value = e;
-        if(i < original.length - 1)
+        inputDom.value = inputDom.value + e;
+        if(i < original.length - 1) {
             pressShiftEnter();
+            inputDom.value = '';
+        }
     });
 })
 
