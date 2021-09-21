@@ -24,7 +24,7 @@ export function tokenize(chars) {
         const e = chars[i];
 
         switch (e) {
-            case '(':
+            case '(':   // list
                 saveAcc();
                 tokens.push(e);
                 clearAcc();
@@ -36,7 +36,7 @@ export function tokenize(chars) {
                 clearAcc();
                 break;
 
-            case '"':
+            case '"':   // string
                 shouldBeEmptyAcc('nospace' + acc);
                 
                 let inner_str = '"';
@@ -53,9 +53,19 @@ export function tokenize(chars) {
 
                 tokens.push(inner_str);
                 break;
+
+            case ';':   // comment
+                saveAcc();
+                clearAcc();
+                
+                for(i += 1; i < chars.length; i++)
+                    if(chars[i] === '\n')
+                        break;
+                
+                break;
             
-            case '\n':
-            case ' ':
+            case '\n':  // change line
+            case ' ':   // space
                 saveAcc();
                 clearAcc();
                 break;
