@@ -70,6 +70,12 @@ class Quoted {
     }
 }
 
+function unQuote(x) {
+    return (x instanceof Quoted)
+           ? x.body
+           : x;
+}
+
 
 function isSymbol(s) {
     return s instanceof _Symbol;
@@ -136,9 +142,7 @@ function standard_env() {
         'string?'   : isString,
         'Math'      : Math,
         'new'       : arg => new arg,
-        'eval'      : x => (x instanceof Quoted) 
-                           ? _eval(x.body) 
-                           : _eval(x),
+        'eval'      : x => _eval(unQuote(x)),
     };
     return env;
 }
@@ -182,7 +186,7 @@ export function _eval(x, env = global_env) {
             var proc = _eval(x[0], env);
             if (proc?.isMacro) {
                 const execArgs = args.map(arg => new Quoted(arg));
-                return _eval(proc(...execArgs).body);
+                return unQuote(proc(...execArgs));
             }
             else {
                 const execArgs = args.map(arg => _eval(arg, env));
