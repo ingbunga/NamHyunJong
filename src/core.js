@@ -3,6 +3,9 @@ export class _Symbol {
     constructor(name) {
         this.name = name;
     }
+    toString(){
+        return this.name;
+    }
 }
 
 export class Env {
@@ -35,6 +38,22 @@ function Procedure(params, bodys, env) {
     );
 
     return createdFunc;
+}
+
+
+function Macro(params, bodys, env) {
+
+    const createdMacro = function (...args) {
+        const createdEnv = new Env(params, args, env);
+
+        return bodys.reduce((_, e) => _eval(e, createdEnv), undefined);
+    }
+    createdMacro.toString = () => (
+        `[Macro (${params.map(e => e?.name)}]`
+    );
+    createdMacro.isMacro = true;
+    
+    return createdMacro;
 }
 
 
@@ -94,6 +113,7 @@ function standard_env() {
         'string?'   : isString,
         'Math'      : Math,
         'new'       : (arg) => new arg,
+        'eval'      : _eval,
     };
     return env;
 }
@@ -103,6 +123,8 @@ export function _eval(x, env = global_env) {
     if (isSymbol(x))
         return env.find(x.name)[x.name];
     if (isNumber(x) || isString(x))
+        return x;
+    if (!(x instanceof Array))
         return x;
     const [op, ...args] = x;
     switch (op?.name) {
@@ -123,6 +145,9 @@ export function _eval(x, env = global_env) {
         case 'lambda':
             var [params, ...bodys] = args;
             return Procedure(params, bodys, env);
+        case 'macro':
+            var [params, ...bodys] = args;
+            return Macro(params, bodys, env);
         case '.':
             return args.slice(1)
                        .reduce((acc, e) => (
@@ -132,8 +157,10 @@ export function _eval(x, env = global_env) {
                         ), _eval(args[0], env));
         default:
             var proc = _eval(x[0], env);
-            var execArgs = args.map(arg => _eval(arg, env));
-            return proc(...execArgs);
+            var execArgs = (proc?.isMacro)
+                           ? args
+                           : args.map(arg => _eval(arg, env));
+            return _eval(proc(...execArgs));
     }
 }
 
