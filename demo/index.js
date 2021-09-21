@@ -14,9 +14,6 @@ function AddToOutput(text) {
     outputDom.innerHTML += text.replace(/\s/gi, '&nbsp;');
 }
 
-const keyPressed = {};
-let multiline_acc = '';
-
 const domconsole = {
     history: {
         list: [''],
@@ -70,7 +67,8 @@ const domconsole = {
 }
 
 
-
+const keyPressed = {};
+let multiline_acc = '';
 
 inputDom.addEventListener('keydown', (e) => {
     keyPressed[e.key] = true;
