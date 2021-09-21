@@ -20,6 +20,8 @@ export class Env {
     find(name) {
         if (this.scope[name] !== undefined)
             return this.scope;
+        if (!this.outer)
+            throw SyntaxError(`cannot find symbol ${name}`);
         else
             return this.outer.find(name);
     }
