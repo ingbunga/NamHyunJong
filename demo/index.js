@@ -161,7 +161,7 @@ inputDom.addEventListener('paste', (event) => {
 globalThis.debug = {
     global_env,
     keyPressed,
-    console
+    domconsole
 }
 
 function gotoBottom(element) {
