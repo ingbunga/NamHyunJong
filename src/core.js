@@ -61,6 +61,16 @@ function Macro(params, bodys, env) {
 }
 
 
+class Quoted {
+    constructor(body) {
+        this.body = body;
+    }
+    toString() {
+        return schemestr(this.body);
+    }
+}
+
+
 function isSymbol(s) {
     return s instanceof _Symbol;
 }
@@ -71,6 +81,15 @@ function isString(s) {
 
 function isNumber(n) {
     return typeof (n) === 'number' || n instanceof Number;
+}
+
+/**
+ * value means not AST
+ * likes Number, String, Quoted...
+ */
+function isValue(x) {
+    // Array means AST.
+    return (!(x instanceof Array));
 }
 
 
@@ -116,8 +135,10 @@ function standard_env() {
         'symbol?'   : isSymbol,
         'string?'   : isString,
         'Math'      : Math,
-        'new'       : (arg) => new arg,
-        'eval'      : _eval,
+        'new'       : arg => new arg,
+        'eval'      : x => (x instanceof Quoted) 
+                           ? _eval(x.body) 
+                           : _eval(x),
     };
     return env;
 }
@@ -126,14 +147,12 @@ function standard_env() {
 export function _eval(x, env = global_env) {
     if (isSymbol(x))
         return env.find(x.name)[x.name];
-    if (isNumber(x) || isString(x))
-        return x;
-    if (!(x instanceof Array))
+    if (isValue(x)) // Quoted, Number, String, ...
         return x;
     const [op, ...args] = x;
     switch (op?.name) {
         case 'quote':
-            return args[0];
+            return new Quoted(args[0]);
         case 'if':
             var [test, conseq, alt] = args;
             var exp = _eval(test, env) ? conseq : alt;
@@ -161,10 +180,14 @@ export function _eval(x, env = global_env) {
                         ), _eval(args[0], env));
         default:
             var proc = _eval(x[0], env);
-            var execArgs = (proc?.isMacro)
-                           ? args
-                           : args.map(arg => _eval(arg, env));
-            return _eval(proc(...execArgs));
+            if (proc?.isMacro) {
+                const execArgs = args.map(arg => new Quoted(arg));
+                return _eval(proc(...execArgs).body);
+            }
+            else {
+                const execArgs = args.map(arg => _eval(arg, env));
+                return proc(...execArgs);
+            }
     }
 }
 

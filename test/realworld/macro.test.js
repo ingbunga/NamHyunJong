@@ -8,7 +8,7 @@ test('unless macro', () => {
     parse_eval(
         `
         (define unless (macro (test then else)
-            (if test
+            (if (eval test)
                 else
                 then)))
         
