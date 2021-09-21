@@ -17,58 +17,58 @@ function AddToOutput(text) {
 const keyPressed = {};
 let multiline_acc = '';
 
-const consoleHistory = {
-    list: [''],
-    historyPtr: 0,
-
-    maximumListSize: 100,
-
-    addToHistory(txt) {
-        this.list.push(txt);
-        if (this.list.length > this.maximumListSize)
-            this.list.shift();
+const domconsole = {
+    history: {
+        list: [''],
+        historyPtr: 0,
+    
+        maximumListSize: 100,
+    
+        addToHistory(txt) {
+            this.list.push(txt);
+            if (this.list.length > this.maximumListSize)
+                this.list.shift();
+        },
+    
+        setHistoryPtrToLast() {
+            this.historyPtr = this.list.length;
+        },
+    
+        setHistoryPtrToPrev() {
+            if (this.historyPtr > 0)
+                this.historyPtr--;
+            else
+                this.historyPtr = 0;
+        },
+    
+        setHistoryPtrToNext() {
+            if (this.historyPtr < this.list.length - 1)
+                this.historyPtr++;
+            else
+                this.historyPtr = this.list.length - 1;
+        },
+    
+        getHistoryTxt() {
+            return this.list[this.historyPtr]
+        }
     },
-
-    setHistoryPtrToLast() {
-        this.historyPtr = this.list.length;
-    },
-
-    setHistoryPtrToPrev() {
-        if (this.historyPtr > 0)
-            this.historyPtr--;
-        else
-            this.historyPtr = 0;
-    },
-
-    setHistoryPtrToNext() {
-        if (this.historyPtr < this.list.length - 1)
-            this.historyPtr++;
-        else
-            this.historyPtr = this.list.length - 1;
-    },
-
-    getHistoryTxt() {
-        return this.list[this.historyPtr]
+    indent: {
+        depth: 0,
+        
+        parseIndentFromInput(input) {
+            let i;
+            for(i = 0; i < input.length; i++)
+                if(input[i] !== ' ')
+                    break;
+            this.depth = i;
+        },
+    
+        getIndentString() {
+            return ' '.repeat(this.depth);
+        }
     }
 }
 
-
-const indentManager = {
-    indentDepth: 0,
-    
-    parseIndentFromInput(input) {
-        let i;
-        for(i = 0; i < input.length; i++)
-            if(input[i] !== ' ')
-                break;
-        this.indentDepth = i;
-    },
-
-    getIndentString() {
-        return ' '.repeat(this.indentDepth);
-    }
-    
-}
 
 
 
@@ -76,12 +76,12 @@ inputDom.addEventListener('keydown', (e) => {
     keyPressed[e.key] = true;
 
     function initInput() {
-        inputDom.value = indentManager.getIndentString();
+        inputDom.value = domconsole.indent.getIndentString();
     }
 
     function writeInput() {
-        consoleHistory.addToHistory(inputDom.value);
-        indentManager.parseIndentFromInput(inputDom.value);
+        domconsole.history.addToHistory(inputDom.value);
+        domconsole.indent.parseIndentFromInput(inputDom.value);
         
         AddToOutput(frontDom.innerHTML + ' ' + inputDom.value + '<br>');
     }
@@ -101,7 +101,7 @@ inputDom.addEventListener('keydown', (e) => {
         frontDom.innerHTML = '..';
         inputDom.value = '';
 
-        consoleHistory.setHistoryPtrToLast();
+        domconsole.history.setHistoryPtrToLast();
         initInput();
     }
     else if (keyPressed['Enter']) {
