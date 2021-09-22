@@ -61,20 +61,14 @@ function Macro(params, bodys, env) {
 }
 
 
-class List {
-    constructor(body) {
-        console.log(body);
-        this.body = body;
-    }
+class List extends Array {
     toString() {
-        return schemestr(this.body);
+        return schemestr(this);
     }
 }
 
 function unQuote(x) {
-    return (x instanceof List)
-        ? x.body
-        : x;
+    return [...x];
 }
 
 
@@ -92,11 +86,14 @@ function isNumber(n) {
 
 /**
  * value means not AST
- * likes Number, String, Quoted...
+ * likes Number, String, List...
  */
 function isValue(x) {
     // Array means AST.
-    return (!(x instanceof Array));
+    return (
+        (x instanceof List) ||
+        !(x instanceof Array)
+    );
 }
 
 
@@ -124,7 +121,7 @@ function standard_env() {
         'expt'      : Math.pow,
         'equal?'    : (x1, x2) => x1 === x2,
         'length'    : xs => xs.length,
-        'list'      : (...args) => new List(args),
+        'list'      : (...args) => new List(...args),
         'list?'     : x => x instanceof List,
         'map'       : (f, xs) => xs.map(f),
         'max'       : (...args) => args.length === 1
@@ -164,7 +161,7 @@ export function _eval(x, env = global_env) {
     const [op, ...args] = x;
     switch (op?.name) {
         case 'quote':
-            return new List(args[0]);
+            return new List(...args[0]);
         case 'if':
             var [test, conseq, alt] = args;
             var exp = _eval(test, env) ? conseq : alt;
@@ -193,7 +190,7 @@ export function _eval(x, env = global_env) {
         default:
             var proc = _eval(x[0], env);
             if (proc?.isMacro) {
-                const execArgs = args.map(arg => new List(arg));
+                const execArgs = args.map(arg => new List(...arg));
                 return _eval(unQuote(proc(...execArgs)));
             }
             else {
