@@ -3,7 +3,7 @@ export class _Symbol {
     constructor(name) {
         this.name = name;
     }
-    toString(){
+    toString() {
         return this.name;
     }
 }
@@ -56,13 +56,14 @@ function Macro(params, bodys, env) {
         `[Macro (${params.map(e => e?.name)})]`
     );
     createdMacro.isMacro = true;
-    
+
     return createdMacro;
 }
 
 
-class Quoted {
+class List {
     constructor(body) {
+        console.log(body);
         this.body = body;
     }
     toString() {
@@ -71,9 +72,9 @@ class Quoted {
 }
 
 function unQuote(x) {
-    return (x instanceof Quoted)
-           ? x.body
-           : x;
+    return (x instanceof List)
+        ? x.body
+        : x;
 }
 
 
@@ -123,8 +124,8 @@ function standard_env() {
         'expt'      : Math.pow,
         'equal?'    : (x1, x2) => x1 === x2,
         'length'    : xs => xs.length,
-        'list'      : (...args) => args,
-        'list?'     : x => x instanceof Array,
+        'list'      : (...args) => new List(args),
+        'list?'     : x => x instanceof List,
         'map'       : (f, xs) => xs.map(f),
         'max'       : (...args) => args.length === 1
                                    ? Math.max(...args[0])
@@ -143,7 +144,14 @@ function standard_env() {
         'Math'      : Math,
         'new'       : arg => new arg,
         'eval'      : x => _eval(unQuote(x)),
+        'typeof'     : x => typeof x,
     };
+    
+    for (let key in env.scope) {
+        let e = env.scope[key];
+        if (e instanceof Function)
+            e.toString = () => `[NativeProcedure (...)]`
+    }
     return env;
 }
 
@@ -156,7 +164,7 @@ export function _eval(x, env = global_env) {
     const [op, ...args] = x;
     switch (op?.name) {
         case 'quote':
-            return new Quoted(args[0]);
+            return new List(args[0]);
         case 'if':
             var [test, conseq, alt] = args;
             var exp = _eval(test, env) ? conseq : alt;
@@ -177,15 +185,15 @@ export function _eval(x, env = global_env) {
             return Macro(params, bodys, env);
         case '.':
             return args.slice(1)
-                       .reduce((acc, e) => (
-                           acc[e.name] instanceof Function
-                           ? acc[e.name].bind(acc)
-                           : acc[e.name]
-                        ), _eval(args[0], env));
+                .reduce((acc, e) => (
+                    acc[e.name] instanceof Function
+                        ? acc[e.name].bind(acc)
+                        : acc[e.name]
+                ), _eval(args[0], env));
         default:
             var proc = _eval(x[0], env);
             if (proc?.isMacro) {
-                const execArgs = args.map(arg => new Quoted(arg));
+                const execArgs = args.map(arg => new List(arg));
                 return _eval(unQuote(proc(...execArgs)));
             }
             else {
@@ -197,12 +205,14 @@ export function _eval(x, env = global_env) {
 
 
 export function schemestr(exp) {
+    if (isSymbol(exp))
+        return exp.name;
     if (isString(exp))
-        return `"${exp}"`
+        return `"${exp}"`;
     if (exp instanceof Array)
-        return '(' + exp.map(schemestr).join(' ') + ')'
+        return '(' + exp.map(schemestr).join(' ') + ')';
     else
-        return String(exp)
+        return String(exp);
 }
 
 
