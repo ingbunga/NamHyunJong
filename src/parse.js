@@ -1,4 +1,4 @@
-import { _Symbol } from './core.js';
+import { _Symbol } from './datatypes.js';
 import { tokenize } from './tokenizer.js';
 
 

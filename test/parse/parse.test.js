@@ -1,5 +1,5 @@
 const { test, expect } = require("@jest/globals");
-import { _Symbol } from '../../src/core';
+import { _Symbol } from '../../src/datatypes';
 import { parse } from '../../src/parse';
 
 

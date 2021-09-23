@@ -1,5 +1,5 @@
 const { test, expect } = require("@jest/globals");
-import { _Symbol, _eval } from '../../src/core';
+import { _eval } from '../../src/core';
 import { parse } from '../../src/parse';
 
 const parse_eval = p => parse(p).map(e=>_eval(e)).slice(-1)[0];
