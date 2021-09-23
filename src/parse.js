@@ -9,20 +9,22 @@ export function read_from_token(tokens) {
         const token = tokens.shift();
     
         switch(token) {
-            case undefined:
+            case undefined: {
                 throw SyntaxError("uncomplete input");
-            case '(':
+            }
+            case '(': {
                 const sub_tkn = []
                 while (tokens[0] !== ')')
                     sub_tkn.push(parse_one(tokens))
                 tokens.shift(); // remove ')'
                 return sub_tkn;
-            
-            case ')':
+            }
+            case ')': {
                 throw SyntaxError('unexpected )');
-                
-            default:
+            }   
+            default: {
                 return atom(token);
+            }
                 
         }
     }

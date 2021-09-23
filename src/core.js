@@ -141,7 +141,7 @@ function standard_env() {
         'Math'      : Math,
         'new'       : arg => new arg,
         'eval'      : x => _eval(unQuote(x)),
-        'typeof'     : x => typeof x,
+        'typeof'    : x => typeof x,
     };
     
     for (let key in env.scope) {
@@ -160,35 +160,45 @@ export function _eval(x, env = global_env) {
         return x;
     const [op, ...args] = x;
     switch (op?.name) {
-        case 'quote':
+        case 'quote': {
             return new List(...args[0]);
-        case 'if':
-            var [test, conseq, alt] = args;
-            var exp = _eval(test, env) ? conseq : alt;
+        }
+        case 'if': {
+            const [test, conseq, alt] = args;
+            const exp = _eval(test, env) ? conseq : alt;
             return _eval(exp, env);
-        case 'define':
-            var [symbol, exp] = args;
+        }
+        case 'define': {
+            // eslint-disable-next-line
+            const [symbol, exp] = args;
             env.scope[symbol.name] = _eval(exp, env);
             return env.scope[symbol.name];
-        case 'set!':
-            var [symbol, exp] = args;
+        }
+        case 'set!': {
+            // eslint-disable-next-line
+            const [symbol, exp] = args;
             env.find(symbol.name)[symbol.name] = _eval(exp, env);
             break;
-        case 'lambda':
-            var [params, ...bodys] = args;
+        }
+        case 'lambda': {
+            const [params, ...bodys] = args;
             return Procedure(params, bodys, env);
-        case 'macro':
-            var [params, ...bodys] = args;
+        }
+        case 'macro': {
+            // eslint-disable-next-line
+            const [params, ...bodys] = args;
             return Macro(params, bodys, env);
-        case '.':
+        }
+        case '.': {
             return args.slice(1)
                 .reduce((acc, e) => (
                     acc[e.name] instanceof Function
                         ? acc[e.name].bind(acc)
                         : acc[e.name]
                 ), _eval(args[0], env));
-        default:
-            var proc = _eval(x[0], env);
+        }
+        default: {
+            const proc = _eval(x[0], env);
             if (proc?.isMacro) {
                 const execArgs = args.map(arg => new List(...arg));
                 return _eval(unQuote(proc(...execArgs)));
@@ -197,6 +207,7 @@ export function _eval(x, env = global_env) {
                 const execArgs = args.map(arg => _eval(arg, env));
                 return proc(...execArgs);
             }
+        }
     }
 }
 
