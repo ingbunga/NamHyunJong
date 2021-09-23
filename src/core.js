@@ -224,7 +224,7 @@ export function _eval(x, env = global_env) {
         default: {
             const proc = _eval(x[0], env);
             if (proc?.isMacro) {
-                const execArgs = args.map(arg => quote(...arg));
+                const execArgs = args.map(arg => quote(arg));
                 return _eval(unQuote(proc(...execArgs)));
             }
             else {
