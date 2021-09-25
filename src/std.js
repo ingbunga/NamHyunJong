@@ -50,15 +50,14 @@ export function standard_env() {
         'number?'       : isNumber,
         'print'         : console.log,
         'produre?'      : x => x instanceof Function,
-        'round'         : Math.round,
         'string?'       : isString,
-        'Math'          : Math,
         'new'           : arg => new arg,
         'eval'          : x => _eval(unQuote(x)),
         'typeof'        : x => typeof x,
         'quotedSymbol?' : x => x instanceof QuotedSymbol,
         'true'          : true,
         'false'         : false,
+        'unquote'       : unQuote,
     };
     
     for (let key in env.scope) {
