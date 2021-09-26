@@ -107,6 +107,7 @@ inputDom.addEventListener('keydown', (e) => {
         try {
             var val = parse(multiline_acc + inputDom.value).map(e => _eval(e));
             
+            console.debug(...val)
             writeInConsole(val.map(schemestr));
         }
         catch (e) {
