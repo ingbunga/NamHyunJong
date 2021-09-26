@@ -29,12 +29,17 @@ export class Env {
         else
             return this.outer.find(name);
     }
+
+    getSymbol(name) {
+        const scope = this.find(name);
+        return scope[name];
+    }
 }
 
 
 export function _eval(x, env = global_env) {
     if (isSymbol(x))
-        return env.find(x.name)[x.name];
+        return env.getSymbol(x.name);
     if (isValue(x)) // Quoted, Number, String, ...
         return x;
     const [op, ...args] = x;

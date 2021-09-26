@@ -13,7 +13,14 @@ import {
 
 export function standard_env() {
     const env = new Env();
-    env.scope = {
+
+    const values = {
+        'null'          : null,
+        'true'          : true,
+        'false'         : false,  
+    };
+
+    const procedures = {
         '+'             : (...xs) => xs.reduce((acc, e) => acc + e),
         '-'             : (...xs) => xs.length === 1
                                      ? -xs[0]
@@ -45,7 +52,6 @@ export function standard_env() {
                                        ? Math.min(...args[0])
                                        : Math.min(...args),
         'not'           : x => !x,
-        'null'          : null,
         'null?'         : x => x === null,
         'number?'       : isNumber,
         'print'         : console.log,
@@ -55,15 +61,29 @@ export function standard_env() {
         'eval'          : x => _eval(unQuote(x)),
         'typeof'        : x => typeof x,
         'quotedSymbol?' : x => x instanceof QuotedSymbol,
-        'true'          : true,
-        'false'         : false,
         'unquote'       : unQuote,
     };
-    
-    for (let key in env.scope) {
-        let e = env.scope[key];
-        if (e instanceof Function)
-            e.toString = () => `[NativeProcedure (...)]`
+
+    const macros = {
+    };
+
+
+    for (const key in procedures) {
+        const value = procedures[key];
+        value.toString = () => `[NativeProcedure (...)]`;
     }
+
+    for (const key in macros) {
+        const value = macros[key];
+        value.isMacro = true;
+        value.toString = () => `[NativeMacro (...)]`;
+    }
+
+    env.scope = {
+        ...values,
+        ...procedures,
+        ...macros
+    };
+    
     return env;
 }

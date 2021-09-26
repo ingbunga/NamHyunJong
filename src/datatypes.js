@@ -56,7 +56,9 @@ export class List extends Array {
 
 
 export class QuotedSymbol extends _Symbol{
-
+    getTarget() {
+        return new _Symbol(this.name);
+    }
 }
 
 
@@ -78,7 +80,7 @@ export function unQuote(x) {
         return [...x];
     }
     else if (x instanceof QuotedSymbol) {
-        return new _Symbol(x.name);
+        return x.getTarget();
     }
     else {
         return x;
